@@ -1,7 +1,7 @@
 <?php 
 include('db_connect.php');
 if(isset($_GET['id'])){
-$user = $conn->query("SELECT * FROM roles where roleID =".$_GET['id']);
+$user = $conn->query("SELECT * FROM roles where roleID =".$_GET['roleID']);
 foreach($user->fetch_array() as $k =>$v){
 	$meta[$k] = $v;
 }

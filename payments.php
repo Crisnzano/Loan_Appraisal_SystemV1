@@ -22,7 +22,7 @@
 					</colgroup>
 					<thead>
 						<tr>
-							<th class="text-center">#</th>
+							<th class="text-center">Repayment ID</th>
 							<th class="text-center">Loan Reference No</th>
 							<th class="text-center">Payee</th>
 							<th class="text-center">Amount</th>
@@ -32,37 +32,34 @@
 					</thead>
 					<tbody>
 						<?php
-							
-							$i=1;
-							
-							$qry = $conn->query("SELECT p.*,l.ref_number,concat(b.lastname,', ',b.firstname,' ',b.middlename)as name, b.phonenumber, b.address from client p inner join loans l on l.id = p.loan_ID inner join client b on b.id = l.clientID  order by p.id asc");
-							while($row = $qry->fetch_assoc());
-								
-
+						 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+						 include('./db_connect.php');
+						 
+						 $query="SELECT p.*, l.ref_number AS rnumber FROM loan_repayment p,loans l where p.loanID = l.loanID ";
+						 $connect=mysqli_query($conn,$query);
+						 
+								 while($row= mysqli_fetch_array($connect))
+						 
+							 {
+								 ?>	
+							 
+					 <tr>
+						 
+						 <td> <?php echo $row['re_paymentID'];?> </td>
+						 <td> <?php echo $row['rnumber'];?> </td>
+						 <td> <?php echo $row['payee'];?> </td>
+						 <td> <?php echo $row['monthly_repayment_amount'];?> </td>
+						 <td> <?php echo $row['penalty_amount'];?> </td>
+						 <td class="text-center"> 
+							 <button class="btn btn-outline-primary btn-sm edit_loan" type="button" data-id="<?php echo $row['rnumber'] ?>"><i class="fa fa-edit"></i></button>
+							  <button class="btn btn-outline-danger btn-sm delete_loan" type="button" data-id="<?php echo $row['rnumber'] ?>"><i class="fa fa-trash"></i></button>
+						  </td>
+ 
+						  </tr>
+						  <?php
+							 }
+ 
 						 ?>
-						 <tr>
-						 	
-						 	<td class="text-center"><?php echo $i++ ?></td>
-						 	<td>
-						 		<?php echo $row['ref_no'] ?>
-						 	</td>
-						 	<td>
-						 		<?php echo $row['payee'] ?>
-						 		
-						 	</td>
-						 	<td>
-						 		<?php echo number_format($row['amount'],2) ?>
-						 		
-						 	</td>
-						 	<td class="text-center">
-						 		<?php echo number_format($row['penalty_amount'],2) ?>
-						 	</td>
-						 	<td class="text-center">
-						 			<button class="btn btn-outline-primary btn-sm edit_payment" type="button" data-id="<?php echo $row['id'] ?>"><i class="fa fa-edit"></i></button>
-						 			<button class="btn btn-outline-danger btn-sm delete_payment" type="button" data-id="<?php echo $row['id'] ?>"><i class="fa fa-trash"></i></button>
-						 	</td>
-
-						 </tr>
 
 						
 					</tbody>

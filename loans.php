@@ -8,10 +8,8 @@
 					<b>Loan List</b>
 					<button class="btn btn-primary btn-sm btn-block col-md-2 float-right" type="button" id="new_application"><i class="fa fa-plus"></i> Create New Application</button>
 				</large>
-				
-			</div>
 			<div class="card-body">
-				<table class="table table-bordered" id="loan-list">
+				<table class="table table-bordered" id=" loan-list">
 					<colgroup>
 						<col width="10%">
 						<col width="25%">
@@ -22,95 +20,62 @@
 					</colgroup>
 					<thead>
 						<tr>
-							<th class="text-center">#</th>
-							<th class="text-center">Borrower</th>
-							<th class="text-center">Loan Details</th>
-							<th class="text-center">Next Payment Details</th>
+							<th class="text-center">Loan ID</th>
+							<th class="text-center">Client Name</th>
+							<th class="text-center">Loan Application Date</th>
+							<th class="text-center">Loan Purpose</th>
+							<th class="text-center">Loan Amount</th>
+							<th class="text-center">Monthly Repayment Amount</th>
 							<th class="text-center">Status</th>
 							<th class="text-center">Action</th>
 						</tr>
 					</thead>
 					<tbody>
 						<?php
+						mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+						include('./db_connect.php');
+						
+						$query="SELECT l.*, p.monthly_repayment_amount AS pamount, p.payee AS payee FROM loans l,loan_repayment p where l.loanID = p.loanID ";
+						$connect=mysqli_query($conn,$query);
+						
+								while($row= mysqli_fetch_array($connect))
+						
+							{
+								?>	
 							
-							$i=1;
-							$type = $conn->query("SELECT * FROM loans where loanID in (SELECT loan_type_id from loans) ");
-							while($row=$type->fetch_assoc()){
-								$type_arr[$row['id']] = $row['type_name'];
-							}
-							$plan = $conn->query("SELECT *,concat(months,' month/s [ ',interest_percentage,'%, ',penalty_rate,' ]') as plan FROM loans where loanID in (SELECT planID from loans) ");
-							while($row=$plan->fetch_assoc()){
-								$plan_arr[$row['id']] = $row;
-							}
-							$qry = $conn->query("SELECT l.*,concat(b.lastname,', ',b.firstname)as name, b.phonenumber, b.address from loans l inner join client b on b.id = l.clientID  order by id asc");
-							while($row = $qry->fetch_assoc()):
-								$monthly = ($row['amount'] + ($row['amount'] * ($plan_arr[$row['plan_id']]['interest_percentage']/100))) / $plan_arr[$row['plan_id']]['months'];
-								$penalty = $monthly * ($plan_arr[$row['plan_id']]['penalty_rate']/100);
-								$payments = $conn->query("SELECT * from loan_repayment where loan_ID =".$row['id']);
-								$paid = $payments->num_rows;
-								$offset = $paid > 0 ? " offset $paid ": "";
-								if($row['status'] == 2):
-									$next = $conn->query("SELECT * FROM loans where loan_ID = '".$row['id']."'  order by date(date_due) asc limit 1 $offset ")->fetch_assoc()['date_due'];
-								endif;
-								$sum_paid = 0;
-								while($p = $payments->fetch_assoc()){
-									$sum_paid += ($p['amount'] - $p['penalty_amount']);
-								}
-
-						 ?>
-						 <tr>
-						 	
-						 	<td class="text-center"><?php echo $i++ ?></td>
-						 	<td>
-						 		<p>Name :<b><?php echo $row['name'] ?></b></p>
-						 		<p><small>Contact # :<b><?php echo $row['contact_no'] ?></small></b></p>
-						 		<p><small>Address :<b><?php echo $row['address'] ?></small></b></p>
-						 	</td>
-						 	<td>
-						 		<p>Reference :<b><?php echo $row['ref_no'] ?></b></p>
-						 		<p><small>Loan type :<b><?php echo $type_arr[$row['loan_type_id']] ?></small></b></p>
-						 		<p><small>Plan :<b><?php echo $plan_arr[$row['plan_id']]['plan'] ?></small></b></p>
-						 		<p><small>Amount :<b><?php echo $row['amount'] ?></small></b></p>
-						 		<p><small>Total Payable Amount :<b><?php echo number_format($monthly * $plan_arr[$row['plan_id']]['months'],2) ?></small></b></p>
-						 		<p><small>Monthly Payable Amount: <b><?php echo number_format($monthly,2) ?></small></b></p>
-						 		<p><small>Overdue Payable Amount: <b><?php echo number_format($penalty,2) ?></small></b></p>
-						 		<?php if($row['status'] == 2 || $row['status'] == 3): ?>
-						 		<p><small>Date Released: <b><?php echo date("M d, Y",strtotime($row['date_released'])) ?></small></b></p>
-						 		<?php endif; ?>
-						 	</td>
-						 	<td>
-						 		<?php if($row['status'] == 2 ): ?>
-						 		<p>Date: <b>
-						 		<?php echo date('M d, Y',strtotime($next)); ?>
-						 		</b></p>
-						 		<p><small>Monthly amount:<b><?php echo number_format($monthly,2) ?></b></small></p>
-						 		<p><small>Penalty :<b><?php echo $add = (date('Ymd',strtotime($next)) < date("Ymd") ) ?  $penalty : 0; ?></b></small></p>
-						 		<p><small>Payable Amount :<b><?php echo number_format($monthly + $add,2) ?></b></small></p>
-						 		<?php else: ?>
-					 				N/a
-						 		<?php endif; ?>
-						 	</td>
-						 	<td class="text-center">
-						 		<?php if($row['status'] == 0): ?>
-						 			<span class="badge badge-warning">Pending</span>
-						 		<?php elseif($row['status'] == 1): ?>
-						 			<span class="badge badge-info">Accepted</span>
-					 			<?php elseif($row['status'] == 2): ?>
-						 			<span class="badge badge-primary">Pending Loan</span>
-					 			<?php elseif($row['status'] == 3): ?>
-						 			<span class="badge badge-success">Completed</span>
-					 			<?php elseif($row['status'] == 4): ?>
-						 			<span class="badge badge-danger">Rejected</span>
-						 		<?php endif; ?>
-						 	</td>
-						 	<td class="text-center">
-						 			<button class="btn btn-outline-primary btn-sm edit_loan" type="button" data-id="<?php echo $row['id'] ?>"><i class="fa fa-edit"></i></button>
-						 			<button class="btn btn-outline-danger btn-sm delete_loan" type="button" data-id="<?php echo $row['id'] ?>"><i class="fa fa-trash"></i></button>
-						 	</td>
+					<tr>
+						
+						<td> <?php echo $row['loanID'];?> </td>
+						<td> <?php echo $row['payee'];?> </td>
+						<td> <?php echo $row['application_date'];?> </td>
+        				<td> <?php echo $row['purpose'];?> </td>
+        				<td> <?php echo $row['loan_amount'];?> </td>
+        				<td> <?php echo $row['pamount'];?> </td>
+        				<td class="text-center">
+						<?php if($row['loan_status'] == 0): ?>
+			    			<span class="badge badge-warning">For Approval</span>
+						<?php elseif($row['loan_status'] == 1): ?>
+							<span class="badge badge-info">Approved</span>
+						<?php elseif($row['loan_status'] == 2): ?>
+							<span class="badge badge-primary">Released</span>
+						<?php elseif($row['loan_status'] == 3): ?>
+							<span class="badge badge-success">Completed</span>
+						<?php elseif($row['loan_status'] == 4): ?>
+							<span class="badge badge-danger">Denied</span>
+						<?php endif; ?>
+						</td>
+						<td class="text-center"> 
+							<button class="btn btn-outline-primary btn-sm edit_loan" type="button" data-id="<?php echo $row['loanID'] ?>"><i class="fa fa-edit"></i></button>
+						 	<button class="btn btn-outline-danger btn-sm delete_loan" type="button" data-id="<?php echo $row['loanID'] ?>"><i class="fa fa-trash"></i></button>
+						 </td>
 
 						 </tr>
+						 <?php
+							}
 
-						<?php endwhile; ?>
+						?>
+
+						
 					</tbody>
 				</table>
 			</div>
@@ -128,7 +93,8 @@
 	td{
 		vertical-align: middle !important;
 	}
-</style>	
+	</style>
+	
 <script>
 	$('#loan-list').dataTable()
 	$('#new_application').click(function(){

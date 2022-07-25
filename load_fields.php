@@ -7,22 +7,22 @@ if(isset($id)){
 		$$k = $val;
 	}
 }
-$loan = $conn->query("SELECT l.*,concat(b.lastname,', ',b.firstname)as name, b.phonenumber, b.address from loans l inner join client b on b.id = l.clientID where l.id = ".$loan_id);
+$loan = $conn->query("SELECT l.*,concat(b.lastname,', ',b.firstname)as name, b.phonenumber, b.address from loans l inner join client b on b.clientID = l.clientID where l.loanID = ".$loan_id);
 foreach($loan->fetch_array() as $k => $v){
 	$meta[$k] = $v;
 }
-$type_arr = $conn->query("SELECT * FROM loans where loanID = '".$meta['loan_type_id']."' ")->fetch_array();
+$type_arr = $conn->query("SELECT * FROM loan_types where loan_typeID = '".$meta['loan_type_id']."' ")->fetch_array();
 
-$plan_arr = $conn->query("SELECT *,concat(months,' month/s [ ',interest_percentage,'%, ',penalty_rate,' ]') as plan FROM loans where loanID  = '".$meta['plan_id']."' ")->fetch_array();
-$monthly = ($meta['amount'] + ($meta['amount'] * ($plan_arr['interest_percentage']/100))) / $plan_arr['months'];
+$plan_arr = $conn->query("SELECT *,concat(months,' loan_tenure/s [ ',interest_percentage,'%, ',penalty_rate,' ]') as plan FROM loan_plan where planID  = '".$meta['planID']."' ")->fetch_array();
+$monthly = ($meta['loan_amount'] + ($meta['loan_amount'] * ($plan_arr['interest_percentage']/100))) / $plan_arr['loan_tenure'];
 $penalty = $monthly * ($plan_arr['penalty_rate']/100);
 $payments = $conn->query("SELECT * from loan_repayment where loan_ID =".$loan_id);
 $paid = $payments->num_rows;
 $offset = $paid > 0 ? " offset $paid ": "";
-	$next = $conn->query("SELECT * FROM loans where loan_ID = '".$loan_id."'  order by date(date_due) asc limit 1 $offset ")->fetch_assoc()['date_due'];
+	$next = $conn->query("SELECT * FROM loan_schedules where loan_ID = '".$loan_id."'  order by date(date_due) asc limit 1 $offset ")->fetch_assoc()['repayment_end_date'];
 $sum_paid = 0;
 while($p = $payments->fetch_assoc()){
-	$sum_paid += ($p['amount'] - $p['penalty_amount']);
+	$sum_paid += ($p['loan_amount'] - $p['penalty_amount']);
 }
 
 ?>

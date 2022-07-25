@@ -1,7 +1,7 @@
 <?php 
 include('db_connect.php');
-if(isset($_GET['id'])){
-$qry = $conn->query("SELECT * FROM loans where loanID = ".$_GET['id']);
+if(isset($_GET['loanID'])){
+$qry = $conn->query("SELECT * FROM loans where loanID = ".$_GET['loanID']);
 foreach($qry->fetch_array() as $k => $v){
 	$$k = $v;
 }
@@ -10,7 +10,7 @@ foreach($qry->fetch_array() as $k => $v){
 <div class="container-fluid">
 	<div class="col-lg-12">
 	<form action="" id="loan-application">
-		<input type="hidden" name="id" value="<?php echo isset($_GET['id']) ? $_GET['id'] : '' ?>">
+		<input type="hidden" name="id" value="<?php echo isset($_GET['loanID']) ? $_GET['loanID'] : '' ?>">
 		<div class="row">
 			<div class="col-md-6">
 				<label class="control-label">Client</label>
@@ -20,19 +20,19 @@ foreach($qry->fetch_array() as $k => $v){
 				<select name="borrower_id" id="borrower_id" class="custom-select browser-default select2">
 					<option value=""></option>
 						<?php while($row = $borrower->fetch_assoc()): ?>
-							<option value="<?php echo $row['id'] ?>" <?php echo isset($borrower_id) && $borrower_id == $row['id'] ? "selected" : '' ?>><?php echo $row['name'] . ' | TaxID:'.$row['tax_id'] ?></option>
+							<option value="<?php echo $row['clientID'] ?>" <?php echo isset($borrower_id) && $borrower_id == $row['clientID'] ? "selected" : '' ?>><?php echo $row['name'] . ' | TaxID:'.$row['tax_id'] ?></option>
 						<?php endwhile; ?>
 				</select>
 			</div>
 			<div class="col-md-6">
 				<label class="control-label">Loan Type</label>
 				<?php
-				$type = $conn->query("SELECT * FROM loans order by `type_name` desc ");
+				$type = $conn->query("SELECT * FROM loan_types order by `type_name` desc ");
 				?>
 				<select name="loan_type_id" id="loan_type_id" class="custom-select browser-default select2">
 					<option value=""></option>
 						<?php while($row = $type->fetch_assoc()): ?>
-							<option value="<?php echo $row['id'] ?>" <?php echo isset($loan_type_id) && $loan_type_id == $row['id'] ? "selected" : '' ?>><?php echo $row['type_name'] ?></option>
+							<option value="<?php echo $row['loan_typeID'] ?>" <?php echo isset($loan_type_id) && $loan_type_id == $row['loan_typeID'] ? "selected" : '' ?>><?php echo $row['type_name'] ?></option>
 						<?php endwhile; ?>
 				</select>
 			</div>
@@ -43,12 +43,12 @@ foreach($qry->fetch_array() as $k => $v){
 			<div class="col-md-6">
 				<label class="control-label">Loan Plan</label>
 				<?php
-				$plan = $conn->query("SELECT * FROM loans order by `months` desc ");
+				$plan = $conn->query("SELECT * FROM loan_plan order by `loan_tenure` desc ");
 				?>
 				<select name="plan_id" id="plan_id" class="custom-select browser-default select2">
 					<option value=""></option>
 						<?php while($row = $plan->fetch_assoc()): ?>
-							<option value="<?php echo $row['id'] ?>" <?php echo isset($plan_id) && $plan_id == $row['id'] ? "selected" : '' ?> data-months="<?php echo $row['months'] ?>" data-interest_percentage="<?php echo $row['interest_percentage'] ?>" data-penalty_rate="<?php echo $row['penalty_rate'] ?>"><?php echo $row['months'] . ' month/s [ '.$row['interest_percentage'].'%, '.$row['penalty_rate'].'% ]' ?></option>
+							<option value="<?php echo $row['planID'] ?>" <?php echo isset($plan_id) && $plan_id == $row['planID'] ? "selected" : '' ?> data-months="<?php echo $row['loan_tenure'] ?>" data-interest_percentage="<?php echo $row['interest_percentage'] ?>" data-penalty_rate="<?php echo $row['penalty_rate'] ?>"><?php echo $row['loan_tenure'] . ' month/s [ '.$row['interest_percentage'].'%, '.$row['penalty_rate'].'% ]' ?></option>
 						<?php endwhile; ?>
 				</select>
 				<small>months [ interest%,penalty% ]</small>
@@ -68,9 +68,6 @@ foreach($qry->fetch_array() as $k => $v){
 			<label class="control-label">&nbsp;</label>
 			<button class="btn btn-primary btn-sm btn-block align-self-end" type="button" id="calculate">Calculate</button>
 		</div>
-		</div>
-		<div id="calculation_table">
-			
 		</div>
 		<?php if(isset($status)): ?>
 		<div class="row">
@@ -121,7 +118,7 @@ foreach($qry->fetch_array() as $k => $v){
 			alert_toast("Select plan and enter amount first.","warning");
 			return false;
 		}
-		var plan = $("#plan_id option[value='"+$("#plan_id").val()+"']")
+		var plan = $("#planID option[value='"+$("#planID").val()+"']")
 		$.ajax({
 			url:"calculation_table.php",
 			method:"POST",

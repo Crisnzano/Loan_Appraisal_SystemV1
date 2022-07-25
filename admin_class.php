@@ -58,7 +58,7 @@ Class Action {
 
 	function save_user(){
 		extract($_POST);
-		$data = " role_name = '$name' ";
+		$data = " firstname = '$name' ";
 		$data .= ", username = '$username' ";
 		$data .= ", password = '$password' ";
 		$data .= ", type = '$type' ";
@@ -128,19 +128,19 @@ Class Action {
 	
 	function save_loan_type(){
 		extract($_POST);
-		$data = " loan_type = '$type_name' ";
+		$data = " type_name = '$type_name' ";
 		$data .= " , description = '$description' ";
 		if(empty($id)){
-			$save = $this->db->query("INSERT INTO loans set ".$data);
+			$save = $this->db->query("INSERT INTO loan_types set ".$data);
 		}else{
-			$save = $this->db->query("UPDATE loans set ".$data." where loanID=".$id);
+			$save = $this->db->query("UPDATE loan_types set ".$data." where loan_typeID=".$id);
 		}
 		if($save)
 			return 1;
 	}
 	function delete_loan_type(){
 		extract($_POST);
-		$delete = $this->db->query("DELETE FROM loans where loan ID = ".$id);
+		$delete = $this->db->query("DELETE FROM loan_types where loan_typeID = ".$id);
 		if($delete)
 			return 1;
 	}
@@ -151,16 +151,16 @@ Class Action {
 		$data .= ", penalty_rate = '$penalty_rate' ";
 		
 		if(empty($id)){
-			$save = $this->db->query("INSERT INTO loans set ".$data);
+			$save = $this->db->query("INSERT INTO loan_plan set ".$data);
 		}else{
-			$save = $this->db->query("UPDATE loans ".$data." where loanID=".$id);
+			$save = $this->db->query("UPDATE loan_plan ".$data." where planID=".$id);
 		}
 		if($save)
 			return 1;
 	}
 	function delete_plan(){
 		extract($_POST);
-		$delete = $this->db->query("DELETE FROM loans where loan ID = ".$id);
+		$delete = $this->db->query("DELETE FROM loan_plan where planID = ".$id);
 		if($delete)
 			return 1;
 	}
@@ -190,35 +190,35 @@ Class Action {
 	
 	function save_loan(){
 		extract($_POST);
-			$data = " client ID = $borrower_id ";
-			$data .= " , loan_type = '$loan_type_id' ";
-			$data .= " , plan ID = '$plan_id' ";
-			$data .= " , amount = '$amount' ";
+			$data = " clientID = $borrower_id ";
+			$data .= " , loan_type_id = '$loan_type_id' ";
+			$data .= " , planID = '$plan_id' ";
+			$data .= " , loan_amount = '$amount' ";
 			$data .= " , purpose = '$purpose' ";
 			if(isset($status)){
 				$data .= " , status = '$status' ";
 				if($status == 2){
-					$plan = $this->db->query("SELECT * FROM loans where planID = $plan_id ")->fetch_array();
-					for($i= 1; $i <= $plan['months'];$i++){
-						$date = date("Y-m-d",strtotime(date("Y-m-d")." +".$i." months"));
-					$chk = $this->db->query("SELECT * FROM loans where loanID = $id and date(repayment_end_date) ='$date'  ");
+					$plan = $this->db->query("SELECT * FROM loan_plan where planID = $plan_id ")->fetch_array();
+					for($i= 1; $i <= $plan['loan_tenure'];$i++){
+						$date = date("Y-m-d",strtotime(date("Y-m-d")." +".$i." loan_tenure"));
+					$chk = $this->db->query("SELECT * FROM loan_schedules where loan_ID = $id and date(repayment_end_date) ='$date'  ");
 					if($chk->num_rows > 0){
-						$ls_id = $chk->fetch_array()['id'];
-						$this->db->query("UPDATE loans set loanID = $id, repayment_end_date ='$date' where loanID = $ls_id ");
+						$ls_id = $chk->fetch_array()['scheduleID'];
+						$this->db->query("UPDATE loan_schedules set loan_ID = $id, repayment_end_date ='$date' where scheduleID = $ls_id ");
 					}else{
-						$this->db->query("INSERT INTO loans set loanID = $id, repayment_end_date ='$date' ");
+						$this->db->query("INSERT INTO loan_schedules set loan_ID = $id, repayment_end_date ='$date' ");
 						$ls_id = $this->db->insert_id;
 					}
 					$sid[] = $ls_id;
 					}
 					$sid = implode(",",$sid);
-					$this->db->query("DELETE FROM loans where loanID = $id and loanID not in ($sid) ");
+					$this->db->query("DELETE FROM loan_schedules where loan_ID = $id and scheduleID not in ($sid) ");
 				$data .= " , date_released = '".date("Y-m-d H:i")."' ";
 
 				}else{
-					$chk = $this->db->query("SELECT * FROM loans where loanID = $id")->num_rows;
+					$chk = $this->db->query("SELECT * FROM loan_schedules where loan_ID = $id")->num_rows;
 					if($chk > 0){
-						$thi->db->query("DELETE FROM loans where loanID = $id ");
+						$thi->db->query("DELETE FROM loan_schedules where loan_ID = $id ");
 					}
 
 				}
@@ -228,14 +228,14 @@ Class Action {
 				$i= 1;
 
 				while($i== 1){
-					$check = $this->db->query("SELECT * FROM loans where ref-number ='$ref_no' ")->num_rows;
+					$check = $this->db->query("SELECT * FROM loans where ref_number ='$ref_no' ")->num_rows;
 					if($check > 0){
 					$ref_no = mt_rand(1,99999999);
 					}else{
 						$i = 0;
 					}
 				}
-				$data .= " , ref_number = '$ref_no' ";
+				$data .= " , ref_no = '$ref_no' ";
 			}
 			if(empty($id))
 			$save = $this->db->query("INSERT INTO loans set ".$data);
@@ -253,7 +253,7 @@ Class Action {
 	
 	function save_payment(){
 		extract($_POST);
-			$data = " loanID = $loan_id ";
+			$data = " loan_ID = $loan_id ";
 			$data .= " , payee = '$payee' ";
 			$data .= " , loan_amount = '$amount' ";
 			$data .= " , penalty_amount = '$penalty_amount' ";

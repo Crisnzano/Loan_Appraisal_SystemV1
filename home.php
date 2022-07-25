@@ -28,7 +28,7 @@
                                         <div class="text-white-75 small">Payments Today</div>
                                         <div class="text-lg font-weight-bold">
                                         	<?php 
-                                        	$payments = $conn->query("SELECT sum(amount) as total FROM re_payments where date(repayment_start_date) = '".date("Y-m-d")."'");
+                                        	$payments = $conn->query("SELECT sum(monthly_repayment_amount) as total FROM loan_repayment ");
                                         	echo $payments->num_rows > 0 ? number_format($payments->fetch_array()['total'],2) : "0.00";
                                         	 ?>
                                         		
@@ -45,6 +45,7 @@
                             </div>
                         </div>
                     </div>
+
 
                 <div class="col-md-3">
                         <div class="card bg-success text-white mb-3">
@@ -80,8 +81,19 @@
                                         <div class="text-white-75 small">Active Loans</div>
                                         <div class="text-lg font-weight-bold">
                                         	<?php 
-                                        	$loans = $conn->query("SELECT * FROM loans where status = 2");
-                                        	echo $loans->num_rows > 0 ? $loans->num_rows : "0";
+                                        	$loans = $conn->query("SELECT * FROM loans where loan_status = 2");
+                                            if($loans){
+                                            if($loans->num_rows > 0 ? $loans->num_rows : "0"){
+                                                $fetchUserData = $loans->fetch_assoc();
+                                                print_r($fetchUserData);
+                                            }
+                                                else{
+                                                    echo "No record found";
+                                                }
+                                            }
+                                            else{
+                                                echo "Error in ".$query."<br>".$conn->error;
+                                            }
                                         	 ?>
                                         		
                                     	</div>
@@ -105,8 +117,8 @@
                                         <div class="text-white-75 small">Total Receivable</div>
                                         <div class="text-lg font-weight-bold">
                                         	<?php 
-                                        	$payments = $conn->query("SELECT sum(amount - penalty_amount) as total FROM loan_repayment where date(repayment_start_date) = '".date("Y-m-d")."'");
-                                        	$loans = $conn->query("SELECT sum(l.amount + (l.amount * (p.interest_percentage/100))) as total FROM loans l inner join loans p on p.id = l.planID where l.status = 2");
+                                        	$payments = $conn->query("SELECT sum(monthly_repayment_amount - penalty_amount) as total FROM loan_repayment ");
+                                        	$loans = $conn->query("SELECT sum(l.loan_amount + (l.loan_amount * (p.interest_percentage/100))) as total FROM loans l inner join loan_plan p WHERE p.planID = l.planID AND l.loan_status = 2");
                                         	$loans =  $loans->num_rows > 0 ? $loans->fetch_array()['total'] : "0";
                                         	$payments =  $payments->num_rows > 0 ? $payments->fetch_array()['total'] : "0";
                                         	echo number_format($loans - $payments,2);
