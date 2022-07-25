@@ -1,8 +1,8 @@
 <?php include 'db_connect.php' ?>
 <?php 
 
-if(isset($_GET['id'])){
-	$qry = $conn->query("SELECT * FROM re_payments where re_paymentID=".$_GET['id']);
+if(isset($_GET['re_paymentID'])){
+	$qry = $conn->query("SELECT * FROM loan_repayment where re_paymentID=".$_GET['re_paymentID']);
 	foreach($qry->fetch_array() as $k => $val){
 		$$k = $val;
 	}
@@ -12,7 +12,7 @@ if(isset($_GET['id'])){
 <div class="container-fluid">
 	<div class="col-lg-12">
 		<form id="manage-payment">
-			<input type="hidden" name="id" value="<?php echo isset($_GET['id']) ? $_GET['id'] : '' ?>">
+			<input type="hidden" name="id" value="<?php echo isset($_GET['re_paymentID']) ? $_GET['re_paymentID'] : '' ?>">
 			<div class="row">
 				<div class="col-md-4">
 					<div class="form-group">
@@ -23,7 +23,7 @@ if(isset($_GET['id'])){
 							$loan = $conn->query("SELECT * from loans where status =2 ");
 							while($row=$loan->fetch_assoc()):
 							?>
-							<option value="<?php echo $row['id'] ?>" <?php echo isset($loan_id) && $loan_id == $row['id'] ? "selected" : '' ?>><?php echo $row['ref_no'] ?></option>
+							<option value="<?php echo $row['loanID'] ?>" <?php echo isset($loan_id) && $loan_id == $row['loanID'] ? "selected" : '' ?>><?php echo $row['ref_number'] ?></option>
 							<?php endwhile; ?>
 						</select>
 						

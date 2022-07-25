@@ -30,13 +30,13 @@ if (isset($_POST["submit"]))
             $_SESSION['username'] = $row["username"];
             $_SESSION['role'] = $row["type"];
            
-            header('');}
+            header('location: Client.php');}
 
          else if($row["type"] == 3){
             $_SESSION['username'] = $row["username"];
             $_SESSION['role'] = $row["type"];
             
-            header('');}
+            header('location: Manager.php ');}
 
     }
 

@@ -1,4 +1,6 @@
 <?php 
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+session_start();
 extract($_POST);
 
 $monthly = ($amount + ($amount * ($interest/100))) / $months;

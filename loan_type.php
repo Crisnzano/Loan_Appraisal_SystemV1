@@ -54,7 +54,7 @@
 							<tbody>
 								<?php 
 								$i = 1;
-								$types = $conn->query("SELECT * FROM loans order by loanID asc");
+								$types = $conn->query("SELECT * FROM loan_types order by loan_typeID asc");
 								while($row=$types->fetch_assoc()):
 								?>
 								<tr>
@@ -65,8 +65,8 @@
 										 <p><small>Description: <b><?php echo $row['description'] ?></b></small></p>
 									</td>
 									<td class="text-center">
-										<button class="btn btn-sm btn-primary edit_ltype" type="button" data-id="<?php echo $row['id'] ?>" data-type_name="<?php echo $row['type_name'] ?>" data-description="<?php echo $row['description'] ?>" >Edit</button>
-										<button class="btn btn-sm btn-danger delete_ltype" type="button" data-id="<?php echo $row['id'] ?>">Delete</button>
+										<button class="btn btn-sm btn-primary edit_ltype" type="button" data-id="<?php echo $row['loan_typeID'] ?>" data-type_name="<?php echo $row['type_name'] ?>" data-description="<?php echo $row['description'] ?>" >Edit</button>
+										<button class="btn btn-sm btn-danger delete_ltype" type="button" data-id="<?php echo $row['loan_typeID'] ?>">Delete</button>
 									</td>
 								</tr>
 								<?php endwhile; ?>

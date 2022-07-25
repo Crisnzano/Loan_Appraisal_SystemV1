@@ -68,17 +68,17 @@
 							<tbody>
 								<?php 
 								$i = 1;
-								$plan = $conn->query("SELECT * FROM loans order by loanID asc");
+								$plan = $conn->query("SELECT * FROM loan_plan order by planID asc");
 								while($row=$plan->fetch_assoc()):
-									$months = $row['months'];
+									$months = $row['loan_tenure'];
 									$months = $months / 12;
 									if($months < 1){
-										$months = $row['months']. " months";
+										$months = $row['loan_tenure']. " loan_tenure";
 									}else{
 										$m = explode(".", $months);
 										$months = $m[0] . " yrs.";
 										if(isset($m[1])){
-											$months .= " and ".number_format(12 * ($m[1] /100 ),0)."month/s";
+											$months .= " and ".number_format(12 * ($m[1] /100 ),0)."loan_tenure/s";
 										}
 									}
 								?>
@@ -90,8 +90,8 @@
 										 <p><small>Over dure Penalty: <b><?php echo $row['penalty_rate']."%" ?></b></small></p>
 									</td>
 									<td class="text-center">
-										<button class="btn btn-sm btn-primary edit_plan" type="button" data-id="<?php echo $row['id'] ?>" data-months="<?php echo $row['months'] ?>" data-interest_percentage="<?php echo $row['interest_percentage'] ?>" >Edit</button>
-										<button class="btn btn-sm btn-danger delete_plan" type="button" data-id="<?php echo $row['id'] ?>">Delete</button>
+										<button class="btn btn-sm btn-primary edit_plan" type="button" data-id="<?php echo $row['planID'] ?>" data-months="<?php echo $row['loan_tenure'] ?>" data-interest_percentage="<?php echo $row['interest_percentage'] ?>" >Edit</button>
+										<button class="btn btn-sm btn-danger delete_plan" type="button" data-id="<?php echo $row['planID'] ?>">Delete</button>
 									</td>
 								</tr>
 								<?php endwhile; ?>
